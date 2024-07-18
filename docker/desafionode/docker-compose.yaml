@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+
+  desafionodedb:
+    image: mysql:8.0
+    command: --innodb-use-native-aio=0
+    container_name: desafionodedb
+    restart: always
+    tty: true
+    volumes:
+      - ./desafionodedb:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=desafionodedb
+      - MYSQL_ROOT_PASSWORD=root
+      #- MYSQL_USER=root
+      #- MYSQL_PASSWORD=root
+    networks:
+      - desafionodenetwork
+
+  desafionodeapp:
+    build:
+      context: desafionodeapp
+    image: passolargo/desafionodeapp:prod
+    container_name: desafionodeapp
+    entrypoint: dockerize -wait tcp://desafionodedb:3306 -timeout 30s docker-entrypoint.sh node index.js
+    networks:
+      - desafionodenetwork
+    volumes:
+      - ./desafionodeapp:/usr/src/app
+    tty: true
+    depends_on:
+      - desafionodedb
+  
+  desafionodenginx:
+    build:
+      context: desafionodenginx
+      #dockerfile: Dockerfile.prod
+    image: passolargo/desafionodenginx:prod
+    container_name: desafionodenginx
+    networks:
+      - desafionodenetwork
+    ports:
+      - "8080:80"
+    depends_on:
+      - desafionodeapp
+
+networks:
+  desafionodenetwork:
+    driver: bridge

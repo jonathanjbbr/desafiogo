@@ -5,4 +5,6 @@
 /mysql
 /nginx
 /node
+/node/node_modules
 desafionode/desafionodedb/*
+fullcycle.code-workspace
