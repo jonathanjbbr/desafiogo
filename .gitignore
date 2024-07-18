@@ -6,5 +6,5 @@
 /nginx
 /node
 /node/node_modules
-desafionode/desafionodedb/*
+/docker/desafionode/desafionodedb/*
 fullcycle.code-workspace

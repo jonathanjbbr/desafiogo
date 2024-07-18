@@ -1,7 +1,7 @@
 Desafio Node FullCucle
 
 Para executar:
-docker run passolargo/desafionodeapp
+docker compose up -d
 
 Resultado esperado:
 Subir um mysql, um node e um nginx como proxy reverso.
