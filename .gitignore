@@ -7,4 +7,6 @@
 /node
 /node/node_modules
 /docker/desafionode/desafionodedb/*
+/docker/desafionode/desafionodeapp/node_modules
+/docker/desafionode/desafionodeapp/node_modules/*
 fullcycle.code-workspace
