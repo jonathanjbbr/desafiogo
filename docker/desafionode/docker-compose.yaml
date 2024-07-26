@@ -20,7 +20,7 @@ services:
 
   desafionodeapp:
     build:
-      context: desafionodeapp
+      context: ./desafionodeapp
     image: passolargo/desafionodeapp:prod
     container_name: desafionodeapp
     entrypoint: dockerize -wait tcp://desafionodedb:3306 -timeout 30s docker-entrypoint.sh node index.js
@@ -28,6 +28,7 @@ services:
       - desafionodenetwork
     volumes:
       - ./desafionodeapp:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
     tty: true
     depends_on:
       - desafionodedb
@@ -48,3 +49,6 @@ services:
 networks:
   desafionodenetwork:
     driver: bridge
+
+volumes:
+  node_modules:
