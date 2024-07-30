@@ -1,42 +1,51 @@
-version: '3'
-
 services:
 
   desafionodedb:
     image: mysql:8.0
-    command: --innodb-use-native-aio=0
     container_name: desafionodedb
     restart: always
     tty: true
     volumes:
-      - ./desafionodedb:/var/lib/mysql
+      - mysql:/var/lib/mysql
+      - ./desafionodedb/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - MYSQL_DATABASE=desafionodedb
       - MYSQL_ROOT_PASSWORD=root
-      #- MYSQL_USER=root
-      #- MYSQL_PASSWORD=root
     networks:
       - desafionodenetwork
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 1s
+      timeout: 60s
+      retries: 60
 
   desafionodeapp:
     build:
       context: ./desafionodeapp
+      args:
+        - "UID=${UID:-1000}"
+        - "GID=${GID:-1000}"
+        - "NODE_ENV=${NODE_ENV:-production}"
+    env_file:
+      - ".env"
     image: passolargo/desafionodeapp:prod
     container_name: desafionodeapp
-    entrypoint: dockerize -wait tcp://desafionodedb:3306 -timeout 30s docker-entrypoint.sh node index.js
+    #user: "${UID}:${GID}"
+    #entrypoint: sh -c "npm install && npm run dev"
+    entrypoint: sh -c "/usr/src/app/showuser.sh && npm install && npm run dev"
     networks:
       - desafionodenetwork
     volumes:
       - ./desafionodeapp:/usr/src/app
-      - node_modules:/usr/src/app/node_modules
+      #- /usr/src/app/node_modules
     tty: true
     depends_on:
-      - desafionodedb
+      desafionodedb:
+        condition: service_healthy
   
   desafionodenginx:
     build:
       context: desafionodenginx
-      #dockerfile: Dockerfile.prod
     image: passolargo/desafionodenginx:prod
     container_name: desafionodenginx
     networks:
@@ -51,4 +60,5 @@ networks:
     driver: bridge
 
 volumes:
-  node_modules:
+  mysql:
+    driver: local
